@@ -117,7 +117,7 @@ function renderSide(){
     ${host&&p.id!==me.id?`<button class="x" title="Remove" onclick="if(confirm('Remove ${esc(p.name)}?'))api('kick',{pid:${p.id}})">✕</button>`:""}</li>`;
   }
   h+="</ul>";
-  if(S.phase!=="lobby")h+=`<p class="muted">Round ${S.round} · ${S.deck_left} cards left<br>Total positions off: ${S.distance_total}</p>`;
+  if(S.phase!=="lobby")h+=`<p class="muted">Round ${S.round} · ${S.deck_left} unplayed cards left<br>Total positions off: ${S.distance_total}</p>`;
   if(me){
     h+='<div class="flexgap" style="margin-bottom:12px">';
     if(host&&(S.phase==="ranking"||S.phase==="guessing"))h+=`<button class="btn small ghost" onclick="api('skip')">Skip round</button>`;

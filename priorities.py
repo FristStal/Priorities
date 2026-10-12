@@ -85,12 +85,12 @@ class Game:
         self.players = []  # {id, name, token, last_seen}
         self.host = None
         self.next_pid = 1
+        self.draw_pile = []  # shared across games; refilled only after every card has been dealt
         self.to_lobby()
 
     # ---------- helpers ----------
     def to_lobby(self):
         self.phase = "lobby"
-        self.deck = []
         self.hand = []
         self.secret = None
         self.group = []
@@ -122,6 +122,16 @@ class Game:
 
     def active(self, p):
         return time.time() - p["last_seen"] < ACTIVE_TIMEOUT
+
+    def draw(self, n):
+        if len(self.draw_pile) < n:
+            leftover = self.draw_pile
+            fresh = [c["id"] for c in CARDS if c["id"] not in leftover]
+            random.shuffle(fresh)
+            self.draw_pile = leftover + fresh  # finish the old cycle before the new one starts
+            self.add_log("Every card has been played - reshuffling the full deck.")
+        hand, self.draw_pile = self.draw_pile[:n], self.draw_pile[n:]
+        return hand
 
     def guessers(self):
         return [p for p in self.players if p["id"] != self.target_id]
@@ -166,15 +176,12 @@ class Game:
             self.to_lobby()
         elif self.phase in ("ranking", "guessing") and pid == self.target_id:
             self.add_log("The Target Player left - dealing a new round.")
-            self.deck.extend(self.hand)
             self.new_round()
         else:
             self.check_consensus()
 
     def start(self):
         self.to_lobby()
-        self.deck = [c["id"] for c in CARDS]
-        random.shuffle(self.deck)
         self.turn = random.randrange(len(self.players))
         self.add_log("Game started! Spell PRIORITIES before the game does.")
         self.new_round()
@@ -183,15 +190,9 @@ class Game:
         if len(self.players) < 2:
             self.to_lobby()
             return
-        if len(self.deck) < HAND_SIZE:
-            p, g = sum(progress(self.players_pile)), sum(progress(self.game_pile))
-            self.winner = "players" if p > g else "game" if g > p else "draw"
-            self.phase = "over"
-            self.add_log("The deck ran out!")
-            return
         self.turn %= len(self.players)
         self.target_id = self.players[self.turn]["id"]
-        self.hand, self.deck = self.deck[:HAND_SIZE], self.deck[HAND_SIZE:]
+        self.hand = self.draw(HAND_SIZE)
         self.secret = None
         self.group = list(self.hand)
         self.agreed = set()
@@ -260,7 +261,6 @@ class Game:
         elif act == "skip":
             if not is_host or self.phase not in ("ranking", "guessing"):
                 return "Can't skip right now."
-            self.deck.extend(self.hand)
             self.turn += 1
             self.add_log("Host skipped the round.")
             self.new_round()
@@ -334,7 +334,7 @@ class Game:
             "winner": self.winner,
             "distance_total": self.distance_total,
             "history": self.history,
-            "deck_left": len(self.deck),
+            "deck_left": len(self.draw_pile),
             "log": self.log,
         }
 
