@@ -21,7 +21,7 @@ h2{margin:0 0 12px;font-size:20px}
 @media(max-width:780px){.layout{grid-template-columns:1fr}main{order:-1}}
 .panel{background:var(--panel);border-radius:16px;padding:16px}
 .muted{color:var(--muted)}
-.plist{list-style:none;padding:0;margin:0 0 12px}
+.plist{list-style:none;padding:0;margin:0 0 12px;max-height:50vh;overflow:auto}
 .plist li{display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:8px;margin-bottom:4px;background:var(--panel2)}
 .plist li.me{outline:2px solid var(--accent)}
 .dot{width:9px;height:9px;border-radius:50%;background:var(--good);flex:none}.dot.off{background:#666}
@@ -110,7 +110,7 @@ function renderScores(){
 function renderSide(){
   if(!S){return}
   const me=S.me,host=me&&me.is_host;
-  let h=`<h2>Players <span class="muted">${S.players.length}/${S.max_players}</span></h2><ul class="plist">`;
+  let h=`<h2>Players <span class="muted">${S.players.length}</span></h2><ul class="plist">`;
   for(const p of S.players){
     h+=`<li class="${me&&p.id===me.id?"me":""}"><span class="dot ${p.active?"":"off"}" title="${p.active?"online":"away"}"></span>
     <span class="pname">${p.host?"👑 ":""}${esc(p.name)}</span>${p.target?"🎯":""}${p.agreed?"✅":""}
@@ -129,11 +129,10 @@ function renderSide(){
   $("side").innerHTML=h;
 }
 function joinHTML(){
-  const full=S.players.length>=S.max_players;
   return `<h2>Join the game</h2>${rulesHTML()}
   <div class="flexgap"><input id="nameInput" maxlength="20" placeholder="Your name" onkeydown="if(event.key==='Enter')join()">
-  <button class="btn gold" onclick="join()" ${full?"disabled":""}>Join</button></div>
-  ${full?'<p class="muted">The game is full (7 players). If you were already in it, enter the same name after 15s to reclaim your seat.</p>':""}`;
+  <button class="btn gold" onclick="join()">Join</button></div>
+  <p class="muted">Already in the game on another device? Enter the same name after 15s to reclaim your seat.</p>`;
 }
 function rulesHTML(){
   return `<ol class="rules">
@@ -145,7 +144,7 @@ function rulesHTML(){
 function lobbyHTML(m){
   const host=S.me.is_host;
   m.innerHTML=`<h2>Lobby</h2>${rulesHTML()}
-  <p class="muted">Share this page's address with up to ${S.max_players} players on the same network.</p>
+  <p class="muted">Share this page's address with as many players as you like.</p>
   ${host?`<button class="btn gold" onclick="api('start')" ${S.players.length<2?"disabled":""}>Start game (${S.players.length} players)</button>`
         :`<div class="banner">Waiting for the host to start…</div>`}`;
 }

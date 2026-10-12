@@ -1,6 +1,6 @@
 """
 PRIORITIES - a cooperative party game of extreme honesty and absurd choices.
-Local-network multiplayer for 2-7 players. Pure Python standard library.
+Multiplayer for 2 or more players (no upper limit). Pure Python standard library.
 
 Run:   python priorities.py [port]   (priorities.html must sit next to this file)
 Then everyone on the same Wi-Fi opens the printed URL in a browser.
@@ -18,7 +18,6 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import urlparse, parse_qs
 
 PORT = int(sys.argv[1]) if len(sys.argv) > 1 else 8000
-MAX_PLAYERS = 7
 HAND_SIZE = 5
 WORD = "PRIORITIES"
 NEEDED = Counter(WORD)
@@ -149,8 +148,6 @@ class Game:
             existing["last_seen"] = time.time()
             self.add_log(f"{name} rejoined.")
             return {"token": existing["token"]}
-        if len(self.players) >= MAX_PLAYERS:
-            return {"error": f"Game is full ({MAX_PLAYERS} players)."}
         p = {"id": self.next_pid, "name": name, "token": secrets.token_hex(12), "last_seen": time.time()}
         self.next_pid += 1
         self.players.append(p)
@@ -318,7 +315,6 @@ class Game:
             "players": [{"id": p["id"], "name": p["name"], "active": self.active(p),
                          "host": p["id"] == self.host, "target": p["id"] == self.target_id,
                          "agreed": p["id"] in self.agreed} for p in self.players],
-            "max_players": MAX_PLAYERS,
             "target_id": self.target_id,
             "target_name": self.name_of(self.target_id) if self.target_id else None,
             "hand": [{"id": c, "text": CARD_BY_ID[c]["text"]} for c in self.hand],
