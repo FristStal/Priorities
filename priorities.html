@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Priorities</title>
+<style>
+:root{--bg:#1c1a2e;--panel:#29263f;--panel2:#33304d;--card:#fffaf0;--ink:#2a2733;--text:#f4f2ff;--muted:#a7a3c8;
+--good:#3ecf8e;--bad:#ff5c7a;--gold:#ffd166;--accent:#7c6cff}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text)}
+header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;padding:14px 20px;background:#15131f;border-bottom:3px solid var(--accent)}
+h1{margin:0;font-size:26px;letter-spacing:4px;font-weight:900}
+h1 span{color:var(--gold)}
+h2{margin:0 0 12px;font-size:20px}
+.scores{display:flex;flex-direction:column;gap:6px}
+.scoreline{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+.scoreline b{width:58px;text-align:right}
+.word{display:flex;gap:3px}
+.tile{width:24px;height:28px;border-radius:5px;display:grid;place-items:center;font-weight:900;font-size:14px;background:#2f2c48;color:#5c5880}
+.tile.p{background:var(--good);color:#06301d}.tile.g{background:var(--bad);color:#3d0012}
+.layout{display:grid;grid-template-columns:250px 1fr;gap:16px;max-width:1100px;margin:0 auto;padding:16px}
+@media(max-width:780px){.layout{grid-template-columns:1fr}main{order:-1}}
+.panel{background:var(--panel);border-radius:16px;padding:16px}
+.muted{color:var(--muted)}
+.plist{list-style:none;padding:0;margin:0 0 12px}
+.plist li{display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:8px;margin-bottom:4px;background:var(--panel2)}
+.plist li.me{outline:2px solid var(--accent)}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--good);flex:none}.dot.off{background:#666}
+.pname{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.x{background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:0 4px}
+.log{font-size:13px;color:var(--muted);max-height:220px;overflow:auto;border-top:1px solid #3d3a5c;padding-top:8px}
+.log div{margin:3px 0}
+button.btn{border:none;border-radius:10px;padding:12px 18px;font-size:16px;font-weight:700;cursor:pointer;background:var(--accent);color:#fff}
+button.btn:hover{filter:brightness(1.1)}
+button.btn.gold{background:var(--gold);color:#3b2a00}
+button.btn.good{background:var(--good);color:#06301d}
+button.btn.ghost{background:var(--panel2);color:var(--text)}
+button.btn.small{padding:7px 12px;font-size:13px}
+button:disabled{opacity:.45;cursor:default}
+.row{display:flex;align-items:center;gap:10px;background:var(--card);color:var(--ink);border-radius:12px;padding:10px 12px;margin:8px 0;box-shadow:0 4px 0 rgba(0,0,0,.3);transition:transform .15s}
+.badge{width:62px;flex:none;text-align:center;border-radius:8px;padding:6px 0;font-weight:900;color:#fff;font-size:18px;line-height:1}
+.badge small{display:block;font-size:10px;font-weight:700;letter-spacing:1px;margin-top:3px;opacity:.9}
+.r1{background:#e63970}.r2{background:#f07a3a}.r3{background:#c9a227}.r4{background:#5a9e6f}.r5{background:#4b6ad1}
+.ctext{flex:1;font-size:19px;font-weight:700}
+.cnum{font-size:11px;color:#9a948a;font-weight:600}
+.arrows{display:flex;flex-direction:column;gap:3px}
+.arrows button{width:38px;height:30px;border:none;border-radius:7px;background:#ece5d6;cursor:pointer;font-size:14px}
+.arrows button:hover:not(:disabled){background:#dcd2bd}
+.banner{padding:12px 14px;border-radius:12px;background:var(--panel2);margin-bottom:12px;font-size:15px}
+.banner.target{background:linear-gradient(90deg,#5b3cc4,#7c6cff)}
+.banner.hush{background:#4a2338}
+.mark{font-size:22px;width:28px;text-align:center}
+.letter{width:30px;height:36px;border-radius:6px;display:grid;place-items:center;font-weight:900;font-size:18px;flex:none}
+.letter.p{background:var(--good);color:#06301d}.letter.g{background:var(--bad);color:#3d0012}
+.actual{font-size:13px;font-weight:700;color:#6b6460;width:70px;text-align:right}
+.big{font-size:40px;font-weight:900;text-align:center;margin:10px 0}
+.center{text-align:center}
+.flexgap{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:14px}@media(max-width:600px){.cols{grid-template-columns:1fr}}
+.mini .row{padding:6px 10px;margin:5px 0}.mini .ctext{font-size:14px}.mini .badge{width:40px;font-size:14px;padding:4px 0}
+input{font-size:18px;padding:12px;border-radius:10px;border:2px solid var(--panel2);background:#15131f;color:var(--text);width:100%;max-width:320px}
+table{width:100%;border-collapse:collapse;font-size:14px}td,th{padding:6px;text-align:left;border-bottom:1px solid #3d3a5c}
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--bad);color:#fff;padding:10px 18px;border-radius:10px;font-weight:700;display:none;z-index:9}
+#conn{font-size:12px}
+ol.rules{padding-left:20px;line-height:1.6;color:#d8d5f0}
+</style></head><body>
+<header><h1>PRIORI<span>T</span>IES</h1><div class="scores" id="scores"></div></header>
+<div class="layout"><aside class="panel" id="side"></aside><main class="panel" id="main"></main></div>
+<div id="toast"></div>
+<script>
+const LABELS=["Love","Like","Meh","Dislike","Loathe"];
+let token=localStorage.getItem("prio_token")||"";
+let S=null,lastJSON="",myRank=null,myRankRound=-1,online=true;
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+function toast(msg){const t=$("toast");t.textContent=msg;t.style.display="block";clearTimeout(t._h);t._h=setTimeout(()=>t.style.display="none",2500)}
+
+async function poll(){
+  try{const r=await fetch("/api/state?token="+encodeURIComponent(token));apply(await r.json());online=true}
+  catch(e){online=false;renderSide()}
+  setTimeout(poll,900);
+}
+function apply(s){const js=JSON.stringify(s);if(js===lastJSON)return;lastJSON=js;S=s;render()}
+async function api(action,data={}){
+  try{
+    const r=await fetch("/api/action",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({token,action,...data})});
+    const j=await r.json();if(j.error)toast(j.error);else if(j.state)apply(j.state);
+  }catch(e){toast("Connection problem")}
+}
+async function join(){
+  const name=$("nameInput").value;
+  const r=await fetch("/api/join",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name})});
+  const j=await r.json();if(j.error){toast(j.error);return}
+  token=j.token;localStorage.setItem("prio_token",token);lastJSON="";
+  const s=await (await fetch("/api/state?token="+token)).json();apply(s);
+}
+function leave(){if(confirm("Leave the game?")){api("leave");token="";localStorage.removeItem("prio_token");lastJSON=""}}
+
+function render(){
+  renderScores();renderSide();
+  const m=$("main");
+  if(!S.me){if(!$("nameInput"))m.innerHTML=joinHTML();return}
+  ({lobby:lobbyHTML,ranking:rankingHTML,guessing:guessingHTML,reveal:revealHTML,over:overHTML})[S.phase](m);
+}
+function tiles(prog,cls){return '<div class="word">'+[..."PRIORITIES"].map((ch,i)=>`<div class="tile ${prog[i]?cls:""}">${ch}</div>`).join("")+"</div>"}
+function renderScores(){
+  if(!S||S.phase==="lobby"){$("scores").innerHTML="";return}
+  $("scores").innerHTML=`<div class="scoreline"><b>Players</b>${tiles(S.players_progress,"p")}<span>${S.players_pile.length}</span></div>
+  <div class="scoreline"><b>Game</b>${tiles(S.game_progress,"g")}<span>${S.game_pile.length}</span></div>`;
+}
+function renderSide(){
+  if(!S){return}
+  const me=S.me,host=me&&me.is_host;
+  let h=`<h2>Players <span class="muted">${S.players.length}/${S.max_players}</span></h2><ul class="plist">`;
+  for(const p of S.players){
+    h+=`<li class="${me&&p.id===me.id?"me":""}"><span class="dot ${p.active?"":"off"}" title="${p.active?"online":"away"}"></span>
+    <span class="pname">${p.host?"👑 ":""}${esc(p.name)}</span>${p.target?"🎯":""}${p.agreed?"✅":""}
+    ${host&&p.id!==me.id?`<button class="x" title="Remove" onclick="if(confirm('Remove ${esc(p.name)}?'))api('kick',{pid:${p.id}})">✕</button>`:""}</li>`;
+  }
+  h+="</ul>";
+  if(S.phase!=="lobby")h+=`<p class="muted">Round ${S.round} · ${S.deck_left} cards left<br>Total positions off: ${S.distance_total}</p>`;
+  if(me){
+    h+='<div class="flexgap" style="margin-bottom:12px">';
+    if(host&&(S.phase==="ranking"||S.phase==="guessing"))h+=`<button class="btn small ghost" onclick="api('skip')">Skip round</button>`;
+    if(host&&S.phase!=="lobby")h+=`<button class="btn small ghost" onclick="if(confirm('End game and return to lobby?'))api('lobby')">End game</button>`;
+    h+=`<button class="btn small ghost" onclick="leave()">Leave</button></div>`;
+  }
+  h+='<div class="log">'+S.log.slice().reverse().map(l=>`<div>• ${esc(l)}</div>`).join("")+"</div>";
+  if(!online)h+='<p id="conn" style="color:var(--bad)">⚠ Lost connection to host…</p>';
+  $("side").innerHTML=h;
+}
+function joinHTML(){
+  const full=S.players.length>=S.max_players;
+  return `<h2>Join the game</h2>${rulesHTML()}
+  <div class="flexgap"><input id="nameInput" maxlength="20" placeholder="Your name" onkeydown="if(event.key==='Enter')join()">
+  <button class="btn gold" onclick="join()" ${full?"disabled":""}>Join</button></div>
+  ${full?'<p class="muted">The game is full (7 players). If you were already in it, enter the same name after 15s to reclaim your seat.</p>':""}`;
+}
+function rulesHTML(){
+  return `<ol class="rules">
+  <li>Each round one <b>Target Player</b> secretly ranks 5 cards from <b>1 (love)</b> to <b>5 (loathe)</b>.</li>
+  <li>Everyone else rearranges the cards together to guess that exact order. The target stays <b>silent</b>!</li>
+  <li>When every guesser hits <b>Agree</b>, the ranking is revealed. Correct spots go to the <b>Players</b>, wrong ones to the <b>Game</b>.</li>
+  <li>Each card carries a letter. The first side to spell <b>PRIORITIES</b> wins.</li></ol>`;
+}
+function lobbyHTML(m){
+  const host=S.me.is_host;
+  m.innerHTML=`<h2>Lobby</h2>${rulesHTML()}
+  <p class="muted">Share this page's address with up to ${S.max_players} players on the same network.</p>
+  ${host?`<button class="btn gold" onclick="api('start')" ${S.players.length<2?"disabled":""}>Start game (${S.players.length} players)</button>`
+        :`<div class="banner">Waiting for the host to start…</div>`}`;
+}
+const card=id=>S.hand.find(c=>c.id===id)||{id,text:"?"};
+function row(id,i,opts={}){
+  const c=card(id);
+  return `<div class="row"><div class="badge r${i+1}">${i+1}<small>${LABELS[i].toUpperCase()}</small></div>
+  <div class="ctext">${esc(c.text)}<div class="cnum">#${c.id}</div></div>
+  ${opts.arrows?`<div class="arrows"><button ${i===0?"disabled":""} onclick="${opts.fn}(${id},${i-1})">▲</button>
+  <button ${i===4?"disabled":""} onclick="${opts.fn}(${id},${i+1})">▼</button></div>`:""}</div>`;
+}
+function localMove(id,to){const i=myRank.indexOf(id);myRank.splice(i,1);myRank.splice(to,0,id);render()}
+function groupMove(id,to){api("move",{card:id,to})}
+function rankingHTML(m){
+  if(S.me.is_target){
+    if(myRankRound!==S.round){myRank=S.hand.map(c=>c.id);myRankRound=S.round}
+    m.innerHTML=`<div class="banner target">🎯 <b>You are the Target Player.</b> Rank these honestly from what you love most to what you loathe most. Nobody can see this.</div>
+    ${myRank.map((id,i)=>row(id,i,{arrows:true,fn:"localMove"})).join("")}
+    <div class="center" style="margin-top:14px"><button class="btn gold" onclick="api('rank',{order:myRank})">🔒 Lock in my secret ranking</button></div>`;
+  }else{
+    m.innerHTML=`<div class="banner">✍️ <b>${esc(S.target_name)}</b> is secretly ranking these cards. Start debating how they'll rank them!</div>
+    ${S.hand.map(c=>`<div class="row"><div class="ctext">${esc(c.text)}<div class="cnum">#${c.id}</div></div></div>`).join("")}`;
+  }
+}
+function guessingHTML(m){
+  if(S.me.is_target){
+    m.innerHTML=`<div class="banner hush">🤐 <b>Stay silent!</b> The group is arranging the cards. No hints, no faces.</div>
+    <div class="cols"><div><h2>Group's guess (live)</h2>${S.group.map((id,i)=>row(id,i)).join("")}</div>
+    <div class="mini"><h2>Your secret</h2>${S.secret.map((id,i)=>row(id,i)).join("")}</div></div>
+    <p class="muted center">${S.agreed_count}/${S.guessers_live} guessers agree</p>`;
+  }else{
+    const ag=S.me.agreed;
+    m.innerHTML=`<div class="banner">🧠 Arrange the cards in the order you think <b>${esc(S.target_name)}</b> ranked them. Talk it out, reach a consensus. Any move resets agreement.</div>
+    ${S.group.map((id,i)=>row(id,i,{arrows:true,fn:"groupMove"})).join("")}
+    <div class="center" style="margin-top:14px"><button class="btn ${ag?"ghost":"good"}" onclick="api('agree')">${ag?"↩ Take back agreement":"✅ I agree with this order"}</button>
+    <p class="muted">${S.agreed_count}/${S.guessers_live} guessers agree. Reveal happens when everyone agrees.</p></div>`;
+  }
+}
+function resultRows(){
+  const r=S.result;
+  return r.cards.map(c=>`<div class="row"><div class="badge r${c.guess_pos}">${c.guess_pos}<small>GUESS</small></div>
+  <div class="ctext">${esc(c.text)}<div class="cnum">#${c.id}</div></div>
+  <div class="actual">${c.correct?"":"actually #"+c.true_pos}</div>
+  <div class="mark">${c.correct?"✅":"❌"}</div><div class="letter ${c.correct?"p":"g"}" title="${c.correct?"to Players":"to Game"}">${c.letter}</div></div>`).join("")+
+  `<p class="center"><b>${r.correct}/5 correct</b>: ${r.correct} letter${r.correct===1?"":"s"} to the Players, ${5-r.correct} to the Game. Off by ${r.distance} position${r.distance===1?"":"s"} in total.</p>`;
+}
+function revealHTML(m){
+  m.innerHTML=`<h2>The big reveal: ${esc(S.result.target)}'s priorities</h2>${resultRows()}
+  <div class="center"><button class="btn gold" onclick="api('next')">Next round ▶</button></div>`;
+}
+function overHTML(m){
+  const w=S.winner;
+  const msg=w==="players"?"🎉 The Players win! You really know each other.":w==="game"?"💀 The Game wins! Do you even know each other?":"🤝 The deck ran out. It's a draw!";
+  let h=`<div class="big">${msg}</div>`;
+  if(S.result)h+=`<h2>Final round: ${esc(S.result.target)}</h2>${resultRows()}`;
+  h+=`<h2>How well do you know each other?</h2><table><tr><th>Round</th><th>Target</th><th>Correct</th><th>Off by</th></tr>`+
+  S.history.map(x=>`<tr><td>${x.round}</td><td>${esc(x.target)}</td><td>${x.correct}/5</td><td>${x.distance}</td></tr>`).join("")+`</table>`;
+  if(S.me.is_host)h+=`<div class="center" style="margin-top:16px"><button class="btn gold" onclick="api('start')">Play again</button>
+  <button class="btn ghost" onclick="api('lobby')">Back to lobby</button></div>`;
+  else h+=`<p class="muted center">Waiting for the host to start a new game…</p>`;
+  m.innerHTML=h;
+}
+poll();
+</script></body></html>
